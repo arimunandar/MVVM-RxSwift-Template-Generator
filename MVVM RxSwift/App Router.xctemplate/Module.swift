@@ -25,6 +25,7 @@ enum Product: Module {
 
 protocol IModule {
     func presentView(parameters: [String: Any])
+    func createView(parameters: [String: Any]) -> UIViewController?
 }
 
 protocol Module {
