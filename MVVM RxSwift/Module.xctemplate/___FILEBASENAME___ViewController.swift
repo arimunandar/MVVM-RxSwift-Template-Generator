@@ -10,6 +10,7 @@
 //              * https://www.youtube.com/channel/UC7jr8DR06tcVR0QKKl6cSNA?view_as=subscriber
 
 import UIKit
+import Bond
 
 class ___VARIABLE_productName:identifier___ViewController: UIViewController {
     var viewModel: I___VARIABLE_productName:identifier___ViewModel!
