@@ -3,7 +3,7 @@
 //  ___PROJECTNAME___
 //
 //  Created by ___FULLUSERNAME___ on ___DATE___.
-//  Copyright (c) ___YEAR___ ___ORGANIZATIONNAME___. All rights reserved.
+//  Copyright (c) ___YEAR___ ARI MUNANDAR. All rights reserved.
 //  Modify By:  * Ari Munandar
 //              * arimunandar.dev@gmail.com
 //              * https://github.com/arimunandar
@@ -11,15 +11,6 @@
 
 import Foundation
 import UIKit
-
-enum PresentType {
-    case root
-    case push
-    case present
-    case presentWithNavigation
-    case modal
-    case modalWithNavigation
-}
 
 class BaseAppRouter: IAppRouter {
     private var window: UIWindow?
@@ -30,10 +21,11 @@ class BaseAppRouter: IAppRouter {
         }
         return navigationStack.first as? UINavigationController
     }
-
+    
+    private var productStack: [String: ((_ parameters: [String: Any]) -> Void)?] = [:]
     private var products: [String: (_ appRouter: IAppRouter) -> IModule]!
     private var onPresented: (() -> Void)?
-    private var onDismissed: (() -> Void)?
+    private var onDismissed: ((_ parameters: [String: Any]) -> Void)?
     private var presentTypes: [PresentType] = []
     private var presentType: PresentType {
         if presentTypes.count > 1 {
@@ -41,125 +33,117 @@ class BaseAppRouter: IAppRouter {
         }
         return presentTypes.first ?? .push
     }
-
+    
     init(window: UIWindow?, products: [String: (_ appRouter: IAppRouter) -> IModule]) {
         self.window = window
         self.products = products
     }
-    
+}
+
+extension BaseAppRouter {
     func getModule(module: Module) -> UIViewController? {
         return getModule(module: module, parameters: [:])
     }
     
-    func getModule(module: Module, parameters: [String : Any]) -> UIViewController? {
+    func getModule(module: Module, parameters: [String: Any]) -> UIViewController? {
         if let product = products[module.routePath] {
             let module = product(self)
             return module.createView(parameters: parameters)
         }
         return nil
     }
-
-    func presentModule(
-        module: Module,
-        type: PresentType
-    ) {
-        presentModule(
-            module: module,
-            parameters: [:],
-            type: type,
-            onPresented: nil,
-            onDismissed: nil
-        )
+    
+    func presentModule(module: Module) {
+        presentModule(module: module, parameters: [:], type: .push, onPresented: nil, onDismissed: nil)
     }
-
-    func presentModule(
-        module: Module,
-        parameters: [String: Any],
-        type: PresentType
-    ) {
-        presentModule(
-            module: module,
-            parameters: parameters,
-            type: type,
-            onPresented: nil,
-            onDismissed: nil
-        )
+    
+    func presentModule(module: Module, parameters: [String: Any]) {
+        presentModule(module: module, parameters: parameters, type: .push, onPresented: nil, onDismissed: nil)
     }
-
-    func presentModule(
-        module: Module,
-        parameters: [String: Any],
-        type: PresentType,
-        onPresented: (() -> Void)?
-    ) {
-        presentModule(
-            module: module,
-            parameters: parameters,
-            type: type,
-            onPresented: onPresented,
-            onDismissed: nil
-        )
+    
+    func presentModule(module: Module, type: PresentType) {
+        presentModule(module: module, parameters: [:], type: type, onPresented: nil, onDismissed: nil)
     }
-
-    func presentModule(
-        module: Module,
-        parameters: [String: Any],
-        type: PresentType,
-        onDismissed: (() -> Void)?
-    ) {
-        presentModule(
-            module: module,
-            parameters: parameters,
-            type: type,
-            onPresented: nil,
-            onDismissed: onDismissed
-        )
+    
+    func presentModule(module: Module, onPresented: (() -> Void)?) {
+        presentModule(module: module, parameters: [:], type: .push, onPresented: onPresented, onDismissed: nil)
     }
-
-    func presentModule(
-        module: Module,
-        parameters: [String: Any],
-        type: PresentType,
-        onPresented: (() -> Void)?,
-        onDismissed: (() -> Void)?
-    ) {
-        self.onPresented = onPresented
-        self.onDismissed = onDismissed
+    
+    func presentModule(module: Module, onDismissed: (([String: Any]) -> Void)?) {
+        presentModule(module: module, parameters: [:], type: .push, onPresented: nil, onDismissed: onDismissed)
+    }
+    
+    func presentModule(module: Module, parameters: [String: Any], type: PresentType) {
+        presentModule(module: module, parameters: parameters, type: type, onPresented: nil, onDismissed: nil)
+    }
+    
+    func presentModule(module: Module, parameters: [String: Any], onPresented: (() -> Void)?) {
+        presentModule(module: module, parameters: parameters, type: .push, onPresented: onPresented, onDismissed: nil)
+    }
+    
+    func presentModule(module: Module, parameters: [String: Any], onDismissed: (([String: Any]) -> Void)?) {
+        presentModule(module: module, parameters: parameters, type: .push, onPresented: nil, onDismissed: onDismissed)
+    }
+    
+    func presentModule(module: Module, type: PresentType, onPresented: (() -> Void)?) {
+        presentModule(module: module, parameters: [:], type: type, onPresented: onPresented, onDismissed: nil)
+    }
+    
+    func presentModule(module: Module, type: PresentType, onDismissed: (([String: Any]) -> Void)?) {
+        presentModule(module: module, parameters: [:], type: type, onPresented: nil, onDismissed: onDismissed)
+    }
+    
+    func presentModule(module: Module, onPresented: (() -> Void)?, onDismissed: (([String: Any]) -> Void)?) {
+        presentModule(module: module, parameters: [:], type: .push, onPresented: onPresented, onDismissed: onDismissed)
+    }
+    
+    func presentModule(module: Module, parameters: [String: Any], type: PresentType, onPresented: (() -> Void)?) {
+        presentModule(module: module, parameters: parameters, type: type, onPresented: onPresented, onDismissed: nil)
+    }
+    
+    func presentModule(module: Module, parameters: [String: Any], type: PresentType, onDismissed: (([String: Any]) -> Void)?) {
+        presentModule(module: module, parameters: parameters, type: type, onPresented: nil, onDismissed: onDismissed)
+    }
+    
+    func presentModule(module: Module, type: PresentType, onPresented: (() -> Void)?, onDismissed: (([String: Any]) -> Void)?) {
+        presentModule(module: module, parameters: [:], type: type, onPresented: onPresented, onDismissed: onDismissed)
+    }
+    
+    func presentModule(module: Module, parameters: [String: Any], type: PresentType, onPresented: (() -> Void)?, onDismissed: (([String: Any]) -> Void)?) {
         presentTypes.append(type)
-
+        if let forModule = UIApplication.topViewController()?.moduleId {
+            productStack[forModule] = onDismissed
+        }
+        
         if let product = products[module.routePath] {
             let module = product(self)
             module.presentView(parameters: parameters)
         }
     }
-
-    func presentView(
-        view: UIViewController,
-        animetedDisplay: Bool,
-        animatedDismiss: Bool
-    ) {
-        presentView(
-            view: view,
-            animetedDisplay: animetedDisplay,
-            animatedDismiss: animatedDismiss,
-            completion: nil
-        )
+    
+    func presentView(view: UIViewController) {
+        presentView(view: view, animated: true, completion: nil)
     }
-
-    func presentView(
-        view: UIViewController,
-        animetedDisplay: Bool,
-        animatedDismiss: Bool,
-        completion: (() -> Void)?
-    ) {
+    
+    func presentView(view: UIViewController, animated: Bool) {
+        presentView(view: view, animated: animated, completion: nil)
+    }
+    
+    func presentView(view: UIViewController, completion: (() -> Void)?) {
+        presentView(view: view, animated: true, completion: completion)
+    }
+    
+    func presentView(view: UIViewController, animated: Bool, completion: (() -> Void)?) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             self?.onPresented?()
         }
-
-        guard let root = window?.rootViewController else {
+        
+        guard window?.rootViewController != nil else {
             if presentType == .root {
                 if view is UITabBarController || view is UIPageViewController {
                     window?.rootViewController = view
+                    guard let navigation = (view as? UITabBarController)?.selectedViewController as? UINavigationController else { return }
+                    navigationStack.append(navigation)
                 } else {
                     let navigation = UINavigationController(rootViewController: view)
                     navigationStack.append(navigation)
@@ -168,15 +152,7 @@ class BaseAppRouter: IAppRouter {
             }
             return
         }
-
-        switch root {
-        case is UITabBarController:
-            guard let navigation = (root as? UITabBarController)?.selectedViewController?.navigationController else { return }
-            navigationStack.append(navigation)
-        default:
-            break
-        }
-
+        
         switch presentType {
         case .root:
             navigation?.setViewControllers([view], animated: false)
@@ -202,26 +178,66 @@ class BaseAppRouter: IAppRouter {
             navigationStack.append(nav)
         }
     }
-
-    func dismissViewController(animeted: Bool) {
-        if isPresentedType() {
-            if navigationStack.count > 1 {
-                navigationStack.removeLast()
+    
+    func dismiss() {
+        dismiss(module: nil, animated: true, parameters: [:])
+    }
+    
+    func dismiss(module: Module) {
+        dismiss(module: module, animated: true, parameters: [:])
+    }
+    
+    func dismiss(animated: Bool) {
+        dismiss(module: nil, animated: animated, parameters: [:])
+    }
+    
+    func dismiss(parameters: [String: Any]) {
+        dismiss(module: nil, animated: true, parameters: parameters)
+    }
+    
+    func dismiss(module: Module, animated: Bool) {
+        dismiss(module: module, animated: animated, parameters: [:])
+    }
+    
+    func dismiss(module: Module, parameters: [String: Any]) {
+        dismiss(module: module, animated: true, parameters: parameters)
+    }
+    
+    func dismiss(animated: Bool, parameters: [String: Any]) {
+        dismiss(module: nil, animated: animated, parameters: parameters)
+    }
+    
+    func dismiss(module: Module?, animated: Bool, parameters: [String: Any]) {
+        if let _module = module {
+            if let vc = navigation?.viewControllers.filter({ $0.moduleId == _module.routePath }).first {
+                onDismissed = productStack[_module.routePath] ?? nil
+                navigation?.popToViewController(vc, animated: animated)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    self?.onDismissed?(parameters)
+                }
             }
-
-            _ = navigation?.dismiss(animated: animeted, completion: onDismissed)
         } else {
-            _ = navigation?.popViewController(animated: animeted)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.onDismissed?()
+            if isPresentedType() {
+                if navigationStack.count > 1 {
+                    navigationStack.removeLast()
+                }
+                
+                _ = navigation?.dismiss(animated: animated, completion: { [weak self] in
+                    self?.onDismissed?(parameters)
+                })
+            } else {
+                _ = navigation?.popViewController(animated: animated)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    self?.onDismissed?(parameters)
+                }
             }
-        }
-
-        if presentTypes.count > 1 {
-            presentTypes.removeLast()
+            
+            if presentTypes.count > 1 {
+                presentTypes.removeLast()
+            }
         }
     }
-
+    
     private func isPresentedType() -> Bool {
         guard let last = presentTypes.last else { fatalError() }
         switch last {

@@ -3,7 +3,7 @@
 //  ___PROJECTNAME___
 //
 //  Created by ___FULLUSERNAME___ on ___DATE___.
-//  Copyright (c) ___YEAR___ ___ORGANIZATIONNAME___. All rights reserved.
+//  Copyright (c) ___YEAR___ ARI MUNANDAR. All rights reserved.
 //  Modify By:  * Ari Munandar
 //              * arimunandar.dev@gmail.com
 //              * https://github.com/arimunandar
@@ -23,11 +23,7 @@ class ___VARIABLE_productName:identifier___Router: I___VARIABLE_productName:iden
     }
 
     func presentView(parameters: [String: Any]) {
-        appRouter.presentView(
-            view: create(parameters: parameters),
-            animetedDisplay: true,
-            animatedDismiss: true
-        )
+        appRouter.presentView(view: create(parameters: parameters))
     }
 
     func create(parameters: [String: Any]) -> ___VARIABLE_productName:identifier___ViewController {
