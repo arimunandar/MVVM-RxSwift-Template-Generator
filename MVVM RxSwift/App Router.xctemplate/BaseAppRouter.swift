@@ -157,6 +157,7 @@ extension BaseAppRouter {
         case .root:
             navigation?.setViewControllers([view], animated: false)
         case .push:
+            view.hidesBottomBarWhenPushed = true
             navigation?.pushViewController(view, animated: true)
         case .present:
             view.modalPresentationStyle = .fullScreen
