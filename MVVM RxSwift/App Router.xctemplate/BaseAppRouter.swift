@@ -22,8 +22,8 @@ class BaseAppRouter: IAppRouter {
         return navigationStack.first as? UINavigationController
     }
     
-    private var productStack: [String: ((_ parameters: [String: Any]) -> Void)?] = [:]
-    private var products: [String: (_ appRouter: IAppRouter) -> IModule]!
+    private var moduleStack: [String: ((_ parameters: [String: Any]) -> Void)?] = [:]
+    private var modules: [String: (_ appRouter: IAppRouter) -> IModule]!
     private var onPresented: (() -> Void)?
     private var onDismissed: ((_ parameters: [String: Any]) -> Void)?
     private var presentTypes: [PresentType] = []
@@ -34,9 +34,9 @@ class BaseAppRouter: IAppRouter {
         return presentTypes.first ?? .push
     }
     
-    init(window: UIWindow?, products: [String: (_ appRouter: IAppRouter) -> IModule]) {
+    init(window: UIWindow?, modules: [String: (_ appRouter: IAppRouter) -> IModule]) {
         self.window = window
-        self.products = products
+        self.modules = modules
     }
 }
 
@@ -46,8 +46,8 @@ extension BaseAppRouter {
     }
     
     func getModule(module: Module, parameters: [String: Any]) -> UIViewController? {
-        if let product = products[module.routePath] {
-            let module = product(self)
+        if let module = modules[module.routePath] {
+            let module = module(self)
             return module.createView(parameters: parameters)
         }
         return nil
@@ -112,11 +112,11 @@ extension BaseAppRouter {
     func presentModule(module: Module, parameters: [String: Any], type: PresentType, onPresented: (() -> Void)?, onDismissed: (([String: Any]) -> Void)?) {
         presentTypes.append(type)
         if let forModule = UIApplication.topViewController()?.moduleId {
-            productStack[forModule] = onDismissed
+            moduleStack[forModule] = onDismissed
         }
         
-        if let product = products[module.routePath] {
-            let module = product(self)
+        if let module = modules[module.routePath] {
+            let module = module(self)
             module.presentView(parameters: parameters)
         }
     }
@@ -210,7 +210,7 @@ extension BaseAppRouter {
     func dismiss(module: Module?, animated: Bool, parameters: [String: Any]) {
         if let _module = module {
             if let vc = navigation?.viewControllers.filter({ $0.moduleId == _module.routePath }).first {
-                onDismissed = productStack[_module.routePath] ?? nil
+                onDismissed = moduleStack[_module.routePath] ?? nil
                 navigation?.popToViewController(vc, animated: animated)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                     self?.onDismissed?(parameters)
@@ -246,5 +246,41 @@ extension BaseAppRouter {
         default:
             return true
         }
+    }
+}
+
+private extension UIApplication {
+    class func topViewController(_ viewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+        if let nav = viewController as? UINavigationController {
+            return topViewController(nav.visibleViewController)
+        }
+        if let tab = viewController as? UITabBarController {
+            if let selected = tab.selectedViewController {
+                return topViewController(selected)
+            }
+        }
+        if let presented = viewController?.presentedViewController {
+            return topViewController(presented)
+        }
+        return viewController
+    }
+}
+
+private extension Bundle {
+    static func appName() -> String {
+        guard let dictionary = Bundle.main.infoDictionary else {
+            return ""
+        }
+        if let version: String = dictionary["CFBundleName"] as? String {
+            return version
+        } else {
+            return ""
+        }
+    }
+}
+
+private extension UIViewController {
+    var moduleId: String {
+        return Bundle.appName() + "/" + String(describing: type(of: self)).replacingOccurrences(of: "ViewController", with: "")
     }
 }

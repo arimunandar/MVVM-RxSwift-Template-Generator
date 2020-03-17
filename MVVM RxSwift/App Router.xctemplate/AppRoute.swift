@@ -80,43 +80,7 @@ class AppRouter: BaseAppRouter {
         
         window?.makeKeyAndVisible()
         
-        let router = AppRouter(window: window, products: modules)
+        let router = AppRouter(window: window, modules: modules)
         return router
-    }
-}
-
-extension UIApplication {
-    class func topViewController(_ viewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
-        if let nav = viewController as? UINavigationController {
-            return topViewController(nav.visibleViewController)
-        }
-        if let tab = viewController as? UITabBarController {
-            if let selected = tab.selectedViewController {
-                return topViewController(selected)
-            }
-        }
-        if let presented = viewController?.presentedViewController {
-            return topViewController(presented)
-        }
-        return viewController
-    }
-}
-
-private extension Bundle {
-    static func appName() -> String {
-        guard let dictionary = Bundle.main.infoDictionary else {
-            return ""
-        }
-        if let version: String = dictionary["CFBundleName"] as? String {
-            return version
-        } else {
-            return ""
-        }
-    }
-}
-
-private extension UIViewController {
-    var moduleId: String {
-        return Bundle.appName() + "/" + String(describing: type(of: self)).replacingOccurrences(of: "ViewController", with: "")
     }
 }
