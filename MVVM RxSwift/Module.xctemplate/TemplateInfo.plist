@@ -11,9 +11,9 @@
 		<string>com.apple.platform.iphoneos</string>
 	</array>
 	<key>DefaultCompletionName</key>
-	<string>SwiftVIPModule</string>
+	<string>SwiftMVVMRxSwiftModule</string>
 	<key>Description</key>
-	<string>Basic Swift VIP Dependency Injection module template.</string>
+	<string>Basic Swift MVVM RxSwift Dependency Injection module template.</string>
 	<key>Kind</key>
 	<string>Xcode.IDEKit.TextSubstitutionFileTemplateKind</string>
 	<key>MainTemplateFile</key>
@@ -28,7 +28,7 @@
 			<key>Default</key>
 			<string></string>
 			<key>Identifier</key>
-			<string>viperModuleName</string>
+			<string>mvvmModuleName</string>
 			<key>Name</key>
 			<string>Module name</string>
 			<key>Required</key>
@@ -38,7 +38,7 @@
 		</dict>
 		<dict>
 			<key>Default</key>
-			<string>___VARIABLE_viperModuleName___</string>
+			<string>___VARIABLE_mvvmModuleName___</string>
 			<key>Identifier</key>
 			<string>productName</string>
 			<key>Type</key>

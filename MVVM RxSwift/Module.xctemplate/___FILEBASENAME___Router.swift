@@ -27,7 +27,8 @@ class ___VARIABLE_productName:identifier___Router: I___VARIABLE_productName:iden
     }
 
     func create(parameters: [String: Any]) -> ___VARIABLE_productName:identifier___ViewController {
-        let view = ___VARIABLE_productName:identifier___ViewController(nibName: "___VARIABLE_productName:identifier___ViewController", bundle: nil)
+        let bundle = Bundle(for: type(of: self))
+        let view = ___VARIABLE_productName:identifier___ViewController(nibName: "___VARIABLE_productName:identifier___ViewController", bundle: bundle)
         let viewModel = ___VARIABLE_productName:identifier___ViewModel()
         viewModel.parameters = parameters
         view.viewModel = viewModel

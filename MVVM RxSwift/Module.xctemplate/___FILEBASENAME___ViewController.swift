@@ -19,24 +19,10 @@ class ___VARIABLE_productName:identifier___ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupBinding()
-        
-        /**
-        Set All Binding Data Input
-        Example:
-        
-        viewModel.input.onViewDidLoad()
-        */
     }
 
     private func setupBinding() {
-        /**
-         Set All Binding Data Output
-         Example:
-         
-         viewModel.output.hello.bind(to: self) { vc, hello in
-             print(hello)
-         }
-         */
+        // do someting...
     }
 }
 

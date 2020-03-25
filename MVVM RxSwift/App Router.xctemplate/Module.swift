@@ -13,12 +13,12 @@ import Foundation
 import UIKit
 
 enum Product: Module {
-    case home // Just an Example 😎
+    case home
 
     var routePath: String {
         switch self {
         case .home:
-            return "___PROJECTNAME___/home" // Just an Example 😎
+            return "___PROJECTNAME___/Home"
         }
     }
 }

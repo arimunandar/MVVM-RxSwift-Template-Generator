@@ -13,19 +13,11 @@ import ReactiveKit
 import UIKit
 
 protocol ___VARIABLE_productName:identifier___ViewModelInputs {
-    /**
-    Example
-    
-    func onViewDidLoad()
-    */
+    // do someting...
 }
 
 protocol ___VARIABLE_productName:identifier___ViewModelOutputs {
-    /**
-     Example
-     
-     var hello: Signal<String, Never> { get }
-     */
+    // do someting...
 }
 
 protocol I___VARIABLE_productName:identifier___ViewModel: ___VARIABLE_productName:identifier___ViewModelInputs, ___VARIABLE_productName:identifier___ViewModelOutputs {
@@ -47,41 +39,15 @@ extension I___VARIABLE_productName:identifier___ViewModel {
 class ___VARIABLE_productName:identifier___ViewModel: I___VARIABLE_productName:identifier___ViewModel {
     var parameters: [String: Any]?
 
-    /**
-     Set varibale subjects
-     Example:
-     
-     private let helloSubject = Subject<String, Never>()
-     */
-    
-    /**
-     Set Manager
-     Example:
-     
-     private var manager: I___VARIABLE_productName:identifier___Manager {
-         return ___VARIABLE_productName:identifier___Manager()
-     }
-     */
-}
-
-extension ___VARIABLE_productName:identifier___ViewModel {
-    /**
-     Implementaion ViewModel Inputs
-     Example:
-     
-     var hello: Signal<String, Never> {
-         return helloSubject.toSignal()
-     }
-     */
-}
-
-extension ___VARIABLE_productName:identifier___ViewModel {
-    /**
-    Implementaion ViewModel Inputs
-    Example:
-    
-    func onViewDidLoad() {
-        helloSubject.send("Hello, World!")
+    private var manager: I___VARIABLE_productName:identifier___Manager {
+        return ___VARIABLE_productName:identifier___Manager()
     }
-    */
+}
+
+extension ___VARIABLE_productName:identifier___ViewModel {
+    // do someting...
+}
+
+extension ___VARIABLE_productName:identifier___ViewModel {
+    // do someting...
 }
