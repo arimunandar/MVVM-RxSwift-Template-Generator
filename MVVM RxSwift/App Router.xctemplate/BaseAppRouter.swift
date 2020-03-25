@@ -218,6 +218,10 @@ extension BaseAppRouter {
                 }
             }
         } else {
+            if let _dismiss = moduleStack.values.first {
+                onDismissed = _dismiss
+            }
+            
             if isPresentedType() {
                 if navigationStack.count > 1 {
                     navigationStack.removeLast()
