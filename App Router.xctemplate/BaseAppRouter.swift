@@ -1,9 +1,9 @@
 //
-//  ___FILENAME___
-//  ___PROJECTNAME___
+//  BaseAppRouter.swift
+//  ARTDEVCommon
 //
-//  Created by ___FULLUSERNAME___ on ___DATE___.
-//  Copyright (c) ___YEAR___ ARI MUNANDAR. All rights reserved.
+//  Created by Ari Munandar on 20/03/20.
+//  Copyright (c) 2020 ARI MUNANDAR. All rights reserved.
 //  Modify By:  * Ari Munandar
 //              * arimunandar.dev@gmail.com
 //              * https://github.com/arimunandar
@@ -12,8 +12,8 @@
 import Foundation
 import UIKit
 
-class BaseAppRouter: IAppRouter {
-    private var window: UIWindow?
+public class BaseAppRouter: IAppRouter {
+    var window: UIWindow?
     private var navigationStack: [UINavigationController?] = []
     private var navigation: UINavigationController? {
         if navigationStack.count > 1 {
@@ -23,7 +23,7 @@ class BaseAppRouter: IAppRouter {
     }
     
     private var moduleStack: [String: ((_ parameters: [String: Any]) -> Void)?] = [:]
-    private var modules: [String: (_ appRouter: IAppRouter) -> IModule]!
+    public var modules: [String: (_ appRouter: IAppRouter) -> IModule]!
     private var onPresented: (() -> Void)?
     private var onDismissed: ((_ parameters: [String: Any]) -> Void)?
     private var presentTypes: [PresentType] = []
@@ -33,14 +33,9 @@ class BaseAppRouter: IAppRouter {
         }
         return presentTypes.first ?? .push
     }
-    
-    init(window: UIWindow?, modules: [String: (_ appRouter: IAppRouter) -> IModule]) {
-        self.window = window
-        self.modules = modules
-    }
 }
 
-extension BaseAppRouter {
+public extension BaseAppRouter {
     func getModule(module: Module) -> UIViewController? {
         return getModule(module: module, parameters: [:])
     }
@@ -134,6 +129,8 @@ extension BaseAppRouter {
     }
     
     func presentView(view: UIViewController, animated: Bool, completion: (() -> Void)?) {
+        print("MODULE ID: ", view.moduleId)
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             self?.onPresented?()
         }

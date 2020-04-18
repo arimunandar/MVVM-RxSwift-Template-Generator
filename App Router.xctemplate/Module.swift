@@ -1,9 +1,9 @@
 //
-//  ___FILENAME___
-//  ___PROJECTNAME___
+//  Module.swift
+//  ARTDEVCommon
 //
-//  Created by ___FULLUSERNAME___ on ___DATE___.
-//  Copyright (c) ___YEAR___ ARI MUNANDAR. All rights reserved.
+//  Created by Ari Munandar on 20/03/20.
+//  Copyright (c) 2020 ARI MUNANDAR. All rights reserved.
 //  Modify By:  * Ari Munandar
 //              * arimunandar.dev@gmail.com
 //              * https://github.com/arimunandar
@@ -12,22 +12,11 @@
 import Foundation
 import UIKit
 
-enum Product: Module {
-    case home
-
-    var routePath: String {
-        switch self {
-        case .home:
-            return "___PROJECTNAME___/Home"
-        }
-    }
-}
-
-protocol IModule {
+public protocol IModule {
     func presentView(parameters: [String: Any])
     func createView(parameters: [String: Any]) -> UIViewController?
 }
 
-protocol Module {
+public protocol Module {
     var routePath: String { get }
 }

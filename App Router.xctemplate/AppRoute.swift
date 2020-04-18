@@ -1,9 +1,9 @@
 //
-//  ___FILENAME___
-//  ___PROJECTNAME___
+//  AppRoute.swift
+//  ARTDEVCommon
 //
-//  Created by ___FULLUSERNAME___ on ___DATE___.
-//  Copyright (c) ___YEAR___ ARI MUNANDAR. All rights reserved.
+//  Created by Ari Munandar on 20/03/20.
+//  Copyright (c) 2020 ARI MUNANDAR. All rights reserved.
 //  Modify By:  * Ari Munandar
 //              * arimunandar.dev@gmail.com
 //              * https://github.com/arimunandar
@@ -12,7 +12,7 @@
 import Foundation
 import UIKit
 
-enum PresentType {
+public enum PresentType {
     case root
     case push
     case present
@@ -21,7 +21,7 @@ enum PresentType {
     case modalWithNavigation
 }
 
-protocol IAppRouter {
+public protocol IAppRouter {
     // MARK: - Get Module Handler
 
     func getModule(module: Module) -> UIViewController?
@@ -64,12 +64,10 @@ protocol IAppRouter {
     func dismiss(module: Module?, animated: Bool, parameters: [String: Any])
 }
 
-class AppRouter: BaseAppRouter {
-    static let share = AppRouter.create()
+public class AppRouter: BaseAppRouter {
+    public static let share = AppRouter().create()
     
-    private static func create() -> AppRouter {
-        let modules: [String: (_ appRouter: IAppRouter) -> IModule] = [:]
-        
+    private func create() -> AppRouter {
         var window: UIWindow?
         
         if let _window = UIApplication.shared.keyWindow {
@@ -80,7 +78,8 @@ class AppRouter: BaseAppRouter {
         
         window?.makeKeyAndVisible()
         
-        let router = AppRouter(window: window, modules: modules)
+        let router = AppRouter()
+        router.window = window
         return router
     }
 }

@@ -1,9 +1,8 @@
-# MVVM with RxSwift Template Generator
+# VIP + Dependency Injection Swift Template
 
-Swift 5+
-Xcode 11.3+
+Swift 5
+XCode 10+
 
-How to use:
+Clone this template in ```~/Library/Developer/Xcode/Templates```
 
-clone this repo in `cd ~/Library/Developer/Xcode/Templates`
-This template is required `Bond | ReactiveKit`
+`ReactiveKit and Bond Library is required`
