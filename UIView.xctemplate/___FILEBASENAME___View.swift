@@ -15,8 +15,24 @@ protocol I___VARIABLE_productName:identifier___View: class {
 	// do someting...
 }
 
-class ___VARIABLE_productName:identifier___View: UIView {
-	// do someting...
+class ___VARIABLE_productName:identifier___View: UIView {	
+	/*
+    // Only override draw() if you perform custom drawing.
+    // An empty implementation adversely affects performance during animation.
+    override func draw(_ rect: CGRect) {
+        // Drawing code
+    }
+    */
+
+    // MARK: - Initialization
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
 }
 
 extension ___VARIABLE_productName:identifier___View: I___VARIABLE_productName:identifier___View {

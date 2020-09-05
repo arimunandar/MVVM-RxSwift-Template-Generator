@@ -1,8 +1,8 @@
 //
 //  AppRoute.swift
-//  ARTDEVCommon
+//  ___PROJECTNAME___
 //
-//  Created by Ari Munandar on 20/03/20.
+//  Created by ___FULLUSERNAME___ on ___DATE___.
 //  Copyright (c) 2020 ARI MUNANDAR. All rights reserved.
 //  Modify By:  * Ari Munandar
 //              * arimunandar.dev@gmail.com
@@ -26,7 +26,7 @@ public protocol IAppRouter {
 
     func getModule(module: Module) -> UIViewController?
     func getModule(module: Module, parameters: [String: Any]) -> UIViewController?
-    
+
     // MARK: - Present Module Handler
 
     func presentModule(module: Module)
@@ -44,7 +44,7 @@ public protocol IAppRouter {
     func presentModule(module: Module, parameters: [String: Any], type: PresentType, onDismissed: (([String: Any]) -> Void)?)
     func presentModule(module: Module, type: PresentType, onPresented: (() -> Void)?, onDismissed: (([String: Any]) -> Void)?)
     func presentModule(module: Module, parameters: [String: Any], type: PresentType, onPresented: (() -> Void)?, onDismissed: (([String: Any]) -> Void)?)
-    
+
     // MARK: - Present View Handler
 
     func presentView(view: UIViewController)
@@ -55,29 +55,39 @@ public protocol IAppRouter {
     // MARK: - Dismiss Handler
 
     func dismiss()
-    func dismiss(module: Module)
     func dismiss(animated: Bool)
     func dismiss(parameters: [String: Any])
-    func dismiss(module: Module, animated: Bool)
-    func dismiss(module: Module, parameters: [String: Any])
     func dismiss(animated: Bool, parameters: [String: Any])
-    func dismiss(module: Module?, animated: Bool, parameters: [String: Any])
+
+    func popViewController()
+    func popViewController(module: Module?)
+    func popViewController(animated: Bool)
+    func popViewController(parameters: [String: Any])
+    func popViewController(module: Module?, animated: Bool)
+    func popViewController(module: Module?, parameters: [String: Any])
+    func popViewController(animated: Bool, parameters: [String: Any])
+    func popViewController(module: Module?, animated: Bool, parameters: [String: Any])
+
+    func popToRoot()
+    func popToRoot(animated: Bool)
+    func popToRoot(parameters: [String: Any])
+    func popToRoot(animated: Bool, parameters: [String: Any])
 }
 
 public class AppRouter: BaseAppRouter {
     public static let share = AppRouter().create()
-    
+
     private func create() -> AppRouter {
         var window: UIWindow?
-        
+
         if let _window = UIApplication.shared.keyWindow {
             window = _window
         } else {
             window = UIWindow(frame: UIScreen.main.bounds)
         }
-        
+
         window?.makeKeyAndVisible()
-        
+
         let router = AppRouter()
         router.window = window
         return router

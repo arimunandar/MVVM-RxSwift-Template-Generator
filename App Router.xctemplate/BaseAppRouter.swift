@@ -1,8 +1,8 @@
 //
 //  BaseAppRouter.swift
-//  ARTDEVCommon
+//  ___PROJECTNAME___
 //
-//  Created by Ari Munandar on 20/03/20.
+//  Created by ___FULLUSERNAME___ on ___DATE___.
 //  Copyright (c) 2020 ARI MUNANDAR. All rights reserved.
 //  Modify By:  * Ari Munandar
 //              * arimunandar.dev@gmail.com
@@ -12,27 +12,19 @@
 import Foundation
 import UIKit
 
-public class BaseAppRouter: IAppRouter {
-    var window: UIWindow?
-    private var navigationStack: [UINavigationController?] = []
-    private var navigation: UINavigationController? {
-        if navigationStack.count > 1 {
-            return navigationStack.last as? UINavigationController
-        }
-        return navigationStack.first as? UINavigationController
+public class BaseAppRouter: NSObject, IAppRouter, UINavigationControllerDelegate {
+    struct ModuleStack {
+        var moduleId: String
+        var presentType: PresentType
+        var dismiss: (([String: Any]) -> Void)?
     }
     
-    private var moduleStack: [String: ((_ parameters: [String: Any]) -> Void)?] = [:]
+    var window: UIWindow?
     public var modules: [String: (_ appRouter: IAppRouter) -> IModule]!
+    private var modulesStack: [ModuleStack] = []
     private var onPresented: (() -> Void)?
     private var onDismissed: ((_ parameters: [String: Any]) -> Void)?
-    private var presentTypes: [PresentType] = []
-    private var presentType: PresentType {
-        if presentTypes.count > 1 {
-            return presentTypes.last ?? .push
-        }
-        return presentTypes.first ?? .push
-    }
+    private var presentType: PresentType = .push
 }
 
 public extension BaseAppRouter {
@@ -47,7 +39,9 @@ public extension BaseAppRouter {
         }
         return nil
     }
-    
+}
+
+public extension BaseAppRouter {
     func presentModule(module: Module) {
         presentModule(module: module, parameters: [:], type: .push, onPresented: nil, onDismissed: nil)
     }
@@ -105,9 +99,18 @@ public extension BaseAppRouter {
     }
     
     func presentModule(module: Module, parameters: [String: Any], type: PresentType, onPresented: (() -> Void)?, onDismissed: (([String: Any]) -> Void)?) {
-        presentTypes.append(type)
-        if let forModule = UIApplication.topViewController()?.moduleId {
-            moduleStack[forModule] = onDismissed
+        presentType = type
+        self.onDismissed = onDismissed
+        self.onPresented = onPresented
+        
+        if let moduleId = UIApplication.topViewController()?.moduleId {
+            modulesStack.append(
+                ModuleStack(
+                    moduleId: moduleId,
+                    presentType: type,
+                    dismiss: onDismissed
+                )
+            )
         }
         
         if let module = modules[module.routePath] {
@@ -129,64 +132,53 @@ public extension BaseAppRouter {
     }
     
     func presentView(view: UIViewController, animated: Bool, completion: (() -> Void)?) {
-        print("MODULE ID: ", view.moduleId)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            self?.onPresented?()
-        }
-        
         guard window?.rootViewController != nil else {
-            if presentType == .root {
-                navigationStack.removeAll()
-                if view is UITabBarController || view is UIPageViewController {
-                    window?.rootViewController = view
-                    guard let navigation = (view as? UITabBarController)?.selectedViewController as? UINavigationController else { return }
-                    navigationStack.append(navigation)
-                } else {
-                    let navigation = UINavigationController(rootViewController: view)
-                    navigationStack.append(navigation)
-                    window?.rootViewController = navigation
-                }
+            switch view {
+            case is UITabBarController, is UIPageViewController, is UINavigationController:
+                window?.rootViewController = view
+            default:
+                let navigation = UINavigationController(rootViewController: view)
+                window?.rootViewController = navigation
             }
+            presentCompletion()
             return
         }
         
         switch presentType {
         case .root:
-            navigationStack.removeAll()
-            if view is UITabBarController || view is UIPageViewController {
-                switchRootViewController(rootViewController: view, animated: true, completion: nil)                
-                guard let navigation = (view as? UITabBarController)?.selectedViewController as? UINavigationController else { return }
-                navigationStack.append(navigation)
-            } else {
+            switch view {
+            case is UITabBarController, is UIPageViewController, is UINavigationController:
+                switchRootViewController(rootViewController: view, animated: true, completion: onPresented)
+            default:
                 let navigation = UINavigationController(rootViewController: view)
-                navigationStack.append(navigation)
-                switchRootViewController(rootViewController: navigation, animated: true, completion: nil)
+                switchRootViewController(rootViewController: navigation, animated: true, completion: onPresented)
             }
+            presentCompletion()
         case .push:
             view.hidesBottomBarWhenPushed = true
-            navigation?.pushViewController(view, animated: true)
+            getNavigation()?.pushViewController(view, animated: true)
+            presentCompletion()
         case .present:
             view.modalPresentationStyle = .fullScreen
-            navigation?.present(view, animated: true, completion: nil)
+            UIApplication.topViewController()?.present(view, animated: true, completion: onPresented)
         case .presentWithNavigation:
             let nav = UINavigationController(rootViewController: view)
             nav.modalPresentationStyle = .fullScreen
-            navigation?.present(nav, animated: true, completion: nil)
-            navigationStack.append(nav)
+            UIApplication.topViewController()?.present(nav, animated: true, completion: onPresented)
         case .modal:
             view.modalPresentationStyle = .overFullScreen
             view.modalTransitionStyle = .crossDissolve
-            navigation?.present(view, animated: true, completion: nil)
+            UIApplication.topViewController()?.present(view, animated: true, completion: onPresented)
         case .modalWithNavigation:
             let nav = UINavigationController(rootViewController: view)
             nav.modalPresentationStyle = .overFullScreen
             nav.modalTransitionStyle = .crossDissolve
-            navigation?.present(nav, animated: true, completion: nil)
-            navigationStack.append(nav)
+            UIApplication.topViewController()?.present(nav, animated: true, completion: onPresented)
         }
     }
-    
+}
+
+extension BaseAppRouter {
     func switchRootViewController(rootViewController: UIViewController, animated: Bool, completion: (() -> Void)?) {
         guard let window = UIApplication.shared.keyWindow else { return }
         if animated {
@@ -204,80 +196,140 @@ public extension BaseAppRouter {
             window.rootViewController = rootViewController
         }
     }
-    
-    func dismiss() {
-        dismiss(module: nil, animated: true, parameters: [:])
+}
+
+extension BaseAppRouter {
+    public func dismiss() {
+        dismiss(animated: true, parameters: [:])
     }
     
-    func dismiss(module: Module) {
-        dismiss(module: module, animated: true, parameters: [:])
+    public func dismiss(animated: Bool) {
+        dismiss(animated: animated, parameters: [:])
     }
     
-    func dismiss(animated: Bool) {
-        dismiss(module: nil, animated: animated, parameters: [:])
+    public func dismiss(parameters: [String: Any]) {
+        dismiss(animated: true, parameters: parameters)
     }
     
-    func dismiss(parameters: [String: Any]) {
-        dismiss(module: nil, animated: true, parameters: parameters)
+    public func dismiss(animated: Bool, parameters: [String: Any]) {
+        onDismissed = modulesStack.last?.dismiss
+        UIApplication.topViewController()?.dismiss(animated: animated, completion: { [weak self] in
+            self?.onDismissed?(parameters)
+        })
+        
+        if let lastNavigation = modulesStack.lastIndex(where: { $0.presentType == .presentWithNavigation || $0.presentType == .modalWithNavigation }) {
+            modulesStack.removeSubrange(lastNavigation..<modulesStack.count)
+        } else {
+            modulesStack.removeLast()
+        }
+    }
+
+    
+    public func popViewController() {
+        popViewController(module: nil, animated: true, parameters: [:])
     }
     
-    func dismiss(module: Module, animated: Bool) {
-        dismiss(module: module, animated: animated, parameters: [:])
+    public func popViewController(module: Module?) {
+        popViewController(module: module, animated: true, parameters: [:])
     }
     
-    func dismiss(module: Module, parameters: [String: Any]) {
-        dismiss(module: module, animated: true, parameters: parameters)
+    public func popViewController(animated: Bool) {
+        popViewController(module: nil, animated: animated, parameters: [:])
     }
     
-    func dismiss(animated: Bool, parameters: [String: Any]) {
-        dismiss(module: nil, animated: animated, parameters: parameters)
+    public func popViewController(parameters: [String: Any]) {
+        popViewController(module: nil, animated: true, parameters: parameters)
     }
     
-    func dismiss(module: Module?, animated: Bool, parameters: [String: Any]) {
-        if let _module = module {
-            if let vc = navigation?.viewControllers.filter({ $0.moduleId == _module.routePath }).first {
-                onDismissed = moduleStack[_module.routePath] ?? nil
-                navigation?.popToViewController(vc, animated: animated)
+    public func popViewController(module: Module?, animated: Bool) {
+        popViewController(module: module, animated: animated, parameters: [:])
+    }
+    
+    public func popViewController(module: Module?, parameters: [String: Any]) {
+        popViewController(module: module, animated: true, parameters: parameters)
+    }
+    
+    public func popViewController(animated: Bool, parameters: [String: Any]) {
+        popViewController(module: nil, animated: animated, parameters: parameters)
+    }
+    
+    public func popViewController(module: Module?, animated: Bool, parameters: [String: Any]) {
+        if let module = module {
+            if let vc = getNavigation()?.viewControllers.filter({ $0.moduleId == module.routePath }).first {
+                getNavigation()?.popToViewController(vc, animated: animated)
+                onDismissed = modulesStack.last(where: { $0.moduleId == vc.moduleId })?.dismiss
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                    self?.onDismissed?(parameters)
+                    guard let self = self else { return }
+                    self.onDismissed?(parameters)
+                }
+                
+                if let lastNavigation = modulesStack.lastIndex(where: { $0.moduleId == vc.moduleId }) {
+                    modulesStack.removeSubrange(lastNavigation..<modulesStack.count)
                 }
             }
         } else {
-            if let _dismiss = moduleStack.values.first {
-                onDismissed = _dismiss
+            getNavigation()?.popViewController(animated: animated)
+            onDismissed = modulesStack.last?.dismiss
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                guard let self = self else { return }
+                self.onDismissed?(parameters)
             }
-            
-            if isPresentedType() {
-                if navigationStack.count > 1 {
-                    navigationStack.removeLast()
-                }
-                
-                _ = navigation?.dismiss(animated: animated, completion: { [weak self] in
-                    self?.onDismissed?(parameters)
-                })
-            } else {
-                _ = navigation?.popViewController(animated: animated)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                    self?.onDismissed?(parameters)
-                }
-            }
-            
-            if presentTypes.count > 1 {
-                presentTypes.removeLast()
-            }
+            modulesStack.removeLast()
         }
     }
     
-    private func isPresentedType() -> Bool {
-        guard let last = presentTypes.last else { fatalError() }
-        switch last {
-        case .push:
-            return false
-        default:
-            return true
+    public func popToRoot() {
+        popToRoot(animated: true, parameters: [:])
+    }
+    
+    public func popToRoot(animated: Bool) {
+        popToRoot(animated: animated, parameters: [:])
+    }
+    
+    public func popToRoot(parameters: [String: Any]) {
+        popToRoot(animated: true, parameters: parameters)
+    }
+    
+    public func popToRoot(animated: Bool, parameters: [String: Any]) {
+        getNavigation()?.popToRootViewController(animated: animated)
+        if let moduleId = getNavigation()?.viewControllers.first?.moduleId {
+            if let lastIndex = modulesStack.lastIndex(where: { $0.moduleId == moduleId }) {
+                onDismissed = modulesStack.last(where: { $0.moduleId == moduleId })?.dismiss
+                let range = lastIndex..<modulesStack.count
+                modulesStack.removeSubrange(range)
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard let self = self else { return }
+            self.onDismissed?(parameters)
         }
     }
 }
+
+extension BaseAppRouter {
+    private func getNavigation() -> UINavigationController? {
+        var navigation: UINavigationController?
+        if let nav = UIApplication.topViewController()?.navigationController {
+            navigation = nav
+        } else if let vc = (window?.rootViewController as? UITabBarController)?.selectedViewController {
+            if let nav = vc.navigationController {
+                navigation = nav
+            }
+        } else if let nav = window?.rootViewController?.navigationController {
+            navigation = nav
+        }
+        navigation?.delegate = self
+        return navigation
+    }
+    
+    private func presentCompletion() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.onPresented?()
+        }
+    }
+}
+
 
 private extension UIApplication {
     class func topViewController(_ viewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
